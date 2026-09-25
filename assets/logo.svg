@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- A single spotlight from above; everything else falls to black. -->
+    <radialGradient id="light" cx="50%" cy="-10%" r="95%">
+      <stop offset="0%" stop-color="#3a3a3a"/>
+      <stop offset="55%" stop-color="#0c0c0c"/>
+      <stop offset="100%" stop-color="#000"/>
+    </radialGradient>
+    <linearGradient id="note" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#9a9a9a"/>
+    </linearGradient>
+    <linearGradient id="beam" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.3"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#light)"/>
+  <!-- Beamed eighth notes, the second one fading out: a song ending. -->
+  <g fill="url(#note)">
+    <ellipse cx="176" cy="366" rx="58" ry="44" transform="rotate(-22 176 366)"/>
+    <rect x="221" y="132" width="22" height="236" rx="4"/>
+  </g>
+  <path d="M221 132 L391 96 L391 142 L221 178 Z" fill="url(#beam)"/>
+  <g fill="url(#note)" opacity="0.3">
+    <ellipse cx="346" cy="330" rx="58" ry="44" transform="rotate(-22 346 330)"/>
+    <rect x="369" y="96" width="22" height="236" rx="4"/>
+  </g>
+</svg>

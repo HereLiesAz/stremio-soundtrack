@@ -14,6 +14,7 @@ reads the same data directly and shows it natively on the details screen and in 
 /stream/{movie|series}/{id}.json   the Soundtrack entry (Stremio stream protocol)
 /soundtrack/{movie|series}/{id}.json   soundtrack data as JSON
 /view/{movie|series}/{id}          web page
+/logo.png                          addon icon
 ~~~
 
 `id` is an IMDb id: `tt0110912` (movie), `tt4574334` (whole series) or
@@ -33,13 +34,13 @@ reads the same data directly and shows it natively on the details screen and in 
 ## Data source
 
 Songs come from IMDb's GraphQL endpoint, which lists soundtrack credits in order of
-appearance. IMDb permits only limited, non-commercial use of this data; run your own
-instance for personal use rather than advertising a shared public one.
+appearance. IMDb permits only limited, non-commercial use of this data. The public
+instance is listed in Stremio's community addons anyway, so if IMDb blocks it, that is the
+reason.
 
 Tunefind and WhatSong sit behind bot challenges and can't be scraped from a Worker, and
-general search results don't carry usable song lists. Tunefind offers an official API on
-application; a Tunefind provider can be added alongside `src/imdb.js` once a key is
-granted.
+general search results don't carry usable song lists. Tunefind's API application page is
+gone, so illumera reads Tunefind on the device instead (its `TunefindSource`).
 
 ## Run and deploy
 
@@ -51,5 +52,22 @@ npx wrangler deploy      # Cloudflare Workers
 
 Install in Stremio with `https://<your-worker>/manifest.json`. Results are cached per
 title for 24 hours.
+
+## Icon
+
+`assets/logo.svg` is the source. `assets/logo.png` (256×256) is rendered from it in
+headless Chromium and embedded in `src/logo.js` as base64, which the Worker serves at
+`/logo.png`. The manifest's `logo` is filled in from the host serving it.
+
+## Publishing
+
+Listed in Stremio's community addons with one request (the Stremio SDK's
+`publishToCentral`), made after a deploy. The listing re-reads the manifest, so later
+deploys update it:
+
+~~~sh
+curl -X POST https://api.strem.io/api/addonPublish -H 'Content-Type: application/json' \
+  -d '{"transportUrl":"https://stremio-soundtrack.hereliesaz.workers.dev/manifest.json","transportName":"http"}'
+~~~
 
 See [RECOGNITION.md](RECOGNITION.md) for identifying the song that is playing right now.
