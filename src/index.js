@@ -4,17 +4,19 @@
 //   /stream/:type/:id.json              one "Soundtrack" entry that opens the web view
 //   /soundtrack/:type/:id.json          the data, for clients with a native view (illumera)
 //   /view/:type/:id                     web view (series: grouped by episode)
+//   /logo.png                           addon icon (assets/logo.svg)
 //
 // ids: movie "tt0110912"; series "tt4574334"; episode "tt4574334:1:2".
 
 import { imdbSoundtrack } from "./imdb.js";
 import { renderView } from "./view.js";
+import { LOGO_PNG_BASE64 } from "./logo.js";
 
 const CACHE_SECONDS = 24 * 60 * 60;
 
 export const manifest = {
   id: "community.soundtrack",
-  version: "0.1.0",
+  version: "0.2.0",
   name: "Soundtrack",
   description: "Every song in a movie or series, grouped by episode and in order of appearance.",
   resources: ["stream"],
@@ -57,7 +59,12 @@ export default {
     const path = url.pathname.replace(/\/+$/, "");
     if (request.method === "OPTIONS") return new Response(null, { headers: { "access-control-allow-origin": "*", "access-control-allow-headers": "*" } });
 
-    if (path === "" || path === "/manifest.json") return json(manifest);
+    // Stremio needs an absolute logo URL, so it's filled in from the host serving the manifest.
+    if (path === "" || path === "/manifest.json") return json({ ...manifest, logo: `${url.origin}/logo.png` });
+    if (path === "/logo.png") {
+      const bytes = Uint8Array.from(atob(LOGO_PNG_BASE64), (c) => c.charCodeAt(0));
+      return new Response(bytes, { headers: { "content-type": "image/png", "access-control-allow-origin": "*", "cache-control": `public, max-age=${CACHE_SECONDS}` } });
+    }
 
     let m = path.match(/^\/(stream|soundtrack)\/(movie|series)\/([^/]+)\.json$/);
     if (m) {

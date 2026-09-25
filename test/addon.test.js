@@ -51,7 +51,9 @@ test("worker: stream entry links to the view; data endpoint filters to the episo
   globalThis.fetch = fakeImdb();
   try {
     const get = (p) => worker.fetch(new Request(`https://addon.test${p}`), {}, { waitUntil() {} }).then((r) => r.json());
-    assert.equal((await get("/manifest.json")).id, "community.soundtrack");
+    const m = await get("/manifest.json");
+    assert.equal(m.id, "community.soundtrack");
+    assert.match(m.logo, /^https?:\/\/[^/]+\/logo\.png$/);
     const { streams } = await get("/stream/series/tt9%3A1%3A1.json");
     assert.equal(streams[0].title, "2 songs");
     assert.equal(streams[0].externalUrl, "https://addon.test/view/series/tt9%3A1%3A1");
@@ -62,4 +64,11 @@ test("worker: stream entry links to the view; data endpoint filters to the episo
   } finally {
     globalThis.fetch = realFetch;
   }
+});
+
+test("worker: serves the icon as a PNG", async () => {
+  const res = await worker.fetch(new Request("https://addon.test/logo.png"), {}, { waitUntil() {} });
+  assert.equal(res.headers.get("content-type"), "image/png");
+  const bytes = new Uint8Array(await res.arrayBuffer());
+  assert.deepEqual(Array.from(bytes.slice(1, 4)), [0x50, 0x4e, 0x47]); // "PNG"
 });
